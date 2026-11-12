@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#173f67">
+  <title>Control de Procesos | CHEFMAN</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <div class="brand">
+        <div class="brand-icon">📦</div>
+        <div>
+          <h1>CONTROL DE PROCESOS</h1>
+          <p>Monitoreo y sincronización de planeaciones CHEFMAN</p>
+        </div>
+      </div>
+
+      <div class="header-actions">
+        <div class="operation-date">
+          <span>FECHA DE OPERACIÓN</span>
+          <strong id="operationDate">--/--/----</strong>
+        </div>
+
+        <div class="date-control">
+          <button id="dateFilterBtn" class="btn btn-date" type="button">📅 <span id="dateFilterLabel">Hoy</span></button>
+          <div id="dateFilterPanel" class="date-filter-panel">
+            <label>Periodo</label>
+            <select id="dateFilter">
+              <option value="today" selected>Hoy</option>
+              <option value="7">Últimos 7 días</option>
+              <option value="30">Últimos 30 días</option>
+              <option value="custom">Rango personalizado</option>
+              <option value="all">Todas las fechas</option>
+            </select>
+            <div id="customDateRange" class="custom-date-range">
+              <label>Desde</label>
+              <input id="dateFrom" type="date">
+              <label>Hasta</label>
+              <input id="dateTo" type="date">
+            </div>
+            <button id="applyDateFilter" class="btn btn-primary btn-small" type="button">Aplicar filtro</button>
+          </div>
+        </div>
+
+        <button id="syncBtn" class="btn btn-primary" type="button">
+          <span class="btn-icon">↻</span>
+          <span>ACTUALIZAR</span>
+        </button>
+      </div>
+    </header>
+
+    <main class="container">
+      <section class="kpi-grid">
+        <article class="kpi-card">
+          <div class="kpi-label">Planeaciones del día</div>
+          <div id="kpiPlaneaciones" class="kpi-value">0</div>
+          <div class="kpi-help">Registros identificados</div>
+        </article>
+
+        <article class="kpi-card">
+          <div class="kpi-label">Piezas solicitadas</div>
+          <div id="kpiSolicitadas" class="kpi-value">0</div>
+          <div class="kpi-help">Total de piezas planeadas</div>
+        </article>
+
+        <article class="kpi-card">
+          <div class="kpi-label">Piezas enviadas</div>
+          <div id="kpiEnviadas" class="kpi-value success">0</div>
+          <div class="kpi-help">Total de piezas procesadas</div>
+        </article>
+
+        <article class="kpi-card">
+          <div class="kpi-label">Por enviar</div>
+          <div id="kpiPorEnviar" class="kpi-value warning">0</div>
+          <div class="kpi-help">Piezas pendientes de envío</div>
+        </article>
+      </section>
+
+      <section class="panel compliance-panel">
+        <div class="panel-title-row">
+          <div>
+            <h2>📊 Cumplimiento de envío</h2>
+            <p>Porcentaje de piezas enviadas respecto a las solicitadas</p>
+          </div>
+          <div id="compliancePercent" class="big-percent">0%</div>
+        </div>
+
+        <div class="progress-track">
+          <div id="complianceBar" class="progress-fill"></div>
+        </div>
+      </section>
+
+      <section class="status-grid">
+        <article class="panel status-panel">
+          <div class="panel-title-row compact">
+            <div>
+              <h2>📦 Preparado</h2>
+              <p>Estado operativo de preparación</p>
+            </div>
+          </div>
+          <div id="preparedChart" class="bar-chart"></div>
+        </article>
+
+        <article class="panel status-panel">
+          <div class="panel-title-row compact">
+            <div>
+              <h2>✓ Validado</h2>
+              <p>Estado de validación</p>
+            </div>
+          </div>
+          <div id="validatedChart" class="bar-chart"></div>
+        </article>
+      </section>
+
+      <section class="panel table-panel">
+        <div class="table-header">
+          <div>
+            <h2>📋 Seguimiento de planeaciones</h2>
+            <p>Los estados <strong>Preparado</strong> y <strong>Validado</strong> se administran en el servidor B.</p>
+          </div>
+
+          <div class="last-update">
+            <span>Última consulta</span>
+            <strong id="lastRefresh">--:--:--</strong>
+          </div>
+        </div>
+
+        <div class="filters">
+          <div class="search-wrap">
+            <span>⌕</span>
+            <input id="searchInput" type="search" placeholder="Buscar por planeación o usuario..." autocomplete="off">
+          </div>
+
+          <select id="statusFilter">
+            <option value="">Todos los estados</option>
+            <option value="Pendiente">Pendiente</option>
+            <option value="En proceso">En proceso</option>
+            <option value="Completo">Completo</option>
+          </select>
+
+          <button id="clearFilters" class="btn btn-light" type="button">Limpiar</button>
+        </div>
+
+        <div class="table-info">
+          <span id="resultCount">0 registros</span>
+          <span class="legend">
+            <span><i class="dot prepared"></i> Preparado</span>
+            <span><i class="dot validated"></i> Validado</span>
+          </span>
+        </div>
+
+        <div class="table-scroll">
+          <table>
+            <thead>
+              <tr>
+                <th>PLANEACIÓN</th>
+                <th>FECHA CARGA</th>
+                <th class="number">PZ PEDIDAS</th>
+                <th class="number">PZ ENVIADAS</th>
+                <th>ÚLTIMA EDICIÓN</th>
+                <th>USUARIO EDITA</th>
+                <th>STATUS</th>
+                <th>PREPARADO</th>
+                <th>VALIDADO</th>
+              </tr>
+            </thead>
+            <tbody id="tableBody">
+              <tr>
+                <td colspan="9" class="empty">Cargando información...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <div id="toast" class="toast" role="status" aria-live="polite"></div>
+    </main>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
